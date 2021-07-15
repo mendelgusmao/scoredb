@@ -43,18 +43,6 @@ func (fm *FuzzyMap) AddExact(key string, item interface{}) {
 	fm.add(key, item)
 }
 
-func (fm *FuzzyMap) add(key string, item interface{}) {
-	candidates, ok := fm.candidates.Get(key)
-
-	if !ok {
-		candidates = set.New(item)
-	} else {
-		candidates.(*set.Set).Insert(item)
-	}
-
-	fm.candidates.Set(key, candidates)
-}
-
 func (fm *FuzzyMap) Get(key string) []Match {
 	if len(key) == 0 {
 		return []Match{}
