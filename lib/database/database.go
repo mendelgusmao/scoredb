@@ -19,7 +19,7 @@ func NewDatabase() *Database {
 }
 
 func (s *Database) CreateCollection(collectionName string, config Configuration, documents []Document) error {
-	if _, ok := s.collections.Get(collectionName); ok {
+	if !s.collections.Has(collectionName) {
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
@@ -28,7 +28,11 @@ func (s *Database) CreateCollection(collectionName string, config Configuration,
 		config.GramSizeLower,
 		config.GramSizeUpper,
 		config.MinScore,
-		buildNormalizerSet(&config),
+		normalizer.NewDefaultSet(&normalizer.SetConfiguration{
+			config.Synonyms,
+			config.StopWords,
+			config.Transliterate,
+		}),
 	)
 
 	s.addDocumentsToFuzzyMap(fuzzyMap, documents)
@@ -80,24 +84,4 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 			fuzzyMap.AddExact(key, document.Content)
 		}
 	}
-}
-
-func buildNormalizerSet(config *Configuration) *normalizer.NormalizerSet {
-	normalizers := []normalizer.KeyNormalizer{
-		normalizer.NewBasicFilter(),
-	}
-
-	if config.Transliterate {
-		normalizers = append(normalizers, normalizer.NewTransliterate())
-	}
-
-	if len(config.StopWords) > 0 {
-		normalizers = append(normalizers, normalizer.NewRemoveStopWords(config.StopWords))
-	}
-
-	if len(config.Synonyms) > 0 {
-		normalizers = append(normalizers, normalizer.NewReplaceSynonyms(config.Synonyms))
-	}
-
-	return normalizer.NewNormalizerSet(normalizers...)
 }

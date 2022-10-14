@@ -45,7 +45,7 @@ func (s *Set[V]) Do(f func(V)) {
 	}
 }
 
-func (s *Set[V]) hash(item any) uint64 {
+func (s *Set[V]) hash(item V) uint64 {
 	h := fnv.New64()
 	h.Write([]byte(fmt.Sprintf("%v", item)))
 
