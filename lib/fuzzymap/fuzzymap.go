@@ -3,24 +3,24 @@ package fuzzymap
 import (
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 	"github.com/mendelgusmao/scoredb/lib/set"
-	cmap "github.com/orcaman/concurrent-map"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/samprakos/gofuzzyset"
 )
 
-type FuzzyMap struct {
-	candidates    cmap.ConcurrentMap // map[string, []interface{}]
+type FuzzyMap[V any] struct {
+	candidates    cmap.ConcurrentMap[*set.Set[V]]
 	fuzzySet      *gofuzzyset.FuzzySet
 	keyNormalizer normalizer.KeyNormalizer
 }
 
-type Match struct {
-	Score   int8        `json:"score"`
-	Content interface{} `json:"content"`
+type Match[V any] struct {
+	Score   int8 `json:"score"`
+	Content V    `json:"content"`
 }
 
-func New(useLevenshtein bool, gramSizeLower int, gramSizeUpper int, minScore float64, keyNormalizer normalizer.KeyNormalizer) *FuzzyMap {
-	return &FuzzyMap{
-		candidates: cmap.New(), // map[string, []interface{}]
+func New[V any](useLevenshtein bool, gramSizeLower int, gramSizeUpper int, minScore float64, keyNormalizer normalizer.KeyNormalizer) *FuzzyMap[V] {
+	return &FuzzyMap[V]{
+		candidates: cmap.New[*set.Set[V]](), // map[string, []any]
 		fuzzySet: gofuzzyset.New(
 			[]string{},
 			useLevenshtein,
@@ -32,44 +32,44 @@ func New(useLevenshtein bool, gramSizeLower int, gramSizeUpper int, minScore flo
 	}
 }
 
-func (fm *FuzzyMap) Add(key string, item interface{}) {
+func (fm *FuzzyMap[V]) Add(key string, item V) {
 	key = fm.normalizeKey(key)
 	fm.fuzzySet.Add(key)
 	fm.add(key, item)
 }
 
-func (fm *FuzzyMap) AddExact(key string, item interface{}) {
+func (fm *FuzzyMap[V]) AddExact(key string, item V) {
 	key = fm.normalizeKey(key)
 	fm.add(key, item)
 }
 
-func (fm *FuzzyMap) Get(key string) []Match {
+func (fm *FuzzyMap[V]) Get(key string) []Match[V] {
 	if len(key) == 0 {
-		return []Match{}
+		return []Match[V]{}
 	}
 
 	key = fm.normalizeKey(key)
 
 	if exactMatches, ok := fm.candidates.Get(key); ok {
-		return fm.expandCandidates(exactMatches.(*set.Set), 100)
+		return fm.expandCandidates(exactMatches, 100)
 	}
 
 	return fm.fuzzyFind(key)
 }
 
-func (fm *FuzzyMap) add(key string, item interface{}) {
+func (fm *FuzzyMap[V]) add(key string, item V) {
 	candidates, ok := fm.candidates.Get(key)
 
 	if !ok {
 		candidates = set.New(item)
 	} else {
-		candidates.(*set.Set).Insert(item)
+		candidates.Insert(item)
 	}
 
 	fm.candidates.Set(key, candidates)
 }
 
-func (fm *FuzzyMap) normalizeKey(key string) string {
+func (fm *FuzzyMap[V]) normalizeKey(key string) string {
 	if fm.keyNormalizer != nil {
 		return fm.keyNormalizer.Normalize(key)
 	}
@@ -77,21 +77,21 @@ func (fm *FuzzyMap) normalizeKey(key string) string {
 	return key
 }
 
-func (fm *FuzzyMap) expandCandidates(candidates *set.Set, score int8) []Match {
-	matches := make([]Match, candidates.Len())
+func (fm *FuzzyMap[V]) expandCandidates(candidates *set.Set[V], score int8) []Match[V] {
+	matches := make([]Match[V], candidates.Len())
 	index := 0
 
-	candidates.Do(func(candidate interface{}) {
-		matches[index] = Match{score, candidate}
+	candidates.Do(func(candidate V) {
+		matches[index] = Match[V]{score, candidate}
 		index++
 	})
 
 	return matches
 }
 
-func (fm *FuzzyMap) fuzzyFind(key string) []Match {
+func (fm *FuzzyMap[V]) fuzzyFind(key string) []Match[V] {
 	scoredKeys := fm.fuzzySet.Get(key)
-	matches := make([]Match, 0)
+	matches := make([]Match[V], 0)
 
 	for _, scoredKey := range scoredKeys {
 		score := int8(scoredKey.Score * 100)
@@ -101,7 +101,7 @@ func (fm *FuzzyMap) fuzzyFind(key string) []Match {
 			continue
 		}
 
-		matches = append(matches, fm.expandCandidates(candidates.(*set.Set), score)...)
+		matches = append(matches, fm.expandCandidates(candidates, score)...)
 	}
 
 	return matches

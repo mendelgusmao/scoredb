@@ -6,12 +6,12 @@ import (
 	"log"
 )
 
-type Set struct {
-	items map[uint64]interface{}
+type Set[V any] struct {
+	items map[uint64]V
 }
 
-func New(items ...interface{}) *Set {
-	set := &Set{items: make(map[uint64]interface{})}
+func New[V any](items ...V) *Set[V] {
+	set := &Set[V]{items: make(map[uint64]V)}
 
 	for _, item := range items {
 		set.Insert(item)
@@ -20,27 +20,32 @@ func New(items ...interface{}) *Set {
 	return set
 }
 
-func (s *Set) Insert(item interface{}) {
+func (s *Set[V]) Insert(item V) {
 	hash := s.hash(item)
 
-	if oldItem, ok := s.items[hash]; ok && item != oldItem {
-		log.Printf("set.Insert: possible collision: %d (`%v` / `%v`)", hash, item, oldItem)
+	if oldItem, ok := s.items[hash]; ok {
+		serializedItem := fmt.Sprintf("%v", item)
+		serializedOldItem := fmt.Sprintf("%v", oldItem)
+
+		if serializedItem != serializedOldItem {
+			log.Printf("set.Insert: possible collision: %d (`%v` / `%v`)", hash, item, oldItem)
+		}
 	}
 
 	s.items[hash] = item
 }
 
-func (s *Set) Len() int {
+func (s *Set[V]) Len() int {
 	return len(s.items)
 }
 
-func (s *Set) Do(f func(interface{})) {
+func (s *Set[V]) Do(f func(V)) {
 	for _, item := range s.items {
 		f(item)
 	}
 }
 
-func (s *Set) hash(item interface{}) uint64 {
+func (s *Set[V]) hash(item any) uint64 {
 	h := fnv.New64()
 	h.Write([]byte(fmt.Sprintf("%v", item)))
 

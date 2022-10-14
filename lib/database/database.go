@@ -3,18 +3,18 @@ package database
 import (
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
-	cmap "github.com/orcaman/concurrent-map"
+	cmap "github.com/orcaman/concurrent-map/v2"
 
 	"fmt"
 )
 
 type Database struct {
-	collections cmap.ConcurrentMap // map[string, FuzzyMap]
+	collections cmap.ConcurrentMap[*fuzzymap.FuzzyMap[any]]
 }
 
 func NewDatabase() *Database {
 	return &Database{
-		collections: cmap.New(),
+		collections: cmap.New[*fuzzymap.FuzzyMap[any]](),
 	}
 }
 
@@ -23,7 +23,7 @@ func (s *Database) CreateCollection(collectionName string, config Configuration,
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
-	fuzzyMap := fuzzymap.New(
+	fuzzyMap := fuzzymap.New[any](
 		config.UseLevenshtein,
 		config.GramSizeLower,
 		config.GramSizeUpper,
@@ -45,19 +45,19 @@ func (s *Database) UpdateCollection(collectionName string, documents []Document)
 		return fmt.Errorf(collectionDoesntExistError, "UpdateCollection", collectionName)
 	}
 
-	s.addDocumentsToFuzzyMap(fuzzyMap.(*fuzzymap.FuzzyMap), documents)
+	s.addDocumentsToFuzzyMap(fuzzyMap, documents)
 
 	return nil
 }
 
-func (s *Database) Query(collectionName, key string) ([]fuzzymap.Match, error) {
+func (s *Database) Query(collectionName, key string) ([]fuzzymap.Match[any], error) {
 	fuzzyMap, ok := s.collections.Get(collectionName)
 
 	if !ok {
-		return []fuzzymap.Match{}, fmt.Errorf(collectionDoesntExistError, "Get", collectionName)
+		return []fuzzymap.Match[any]{}, fmt.Errorf(collectionDoesntExistError, "Get", collectionName)
 	}
 
-	return fuzzyMap.(*fuzzymap.FuzzyMap).Get(key), nil
+	return fuzzyMap.Get(key), nil
 }
 
 func (s *Database) RemoveCollection(collectionName string) error {
@@ -70,7 +70,7 @@ func (s *Database) RemoveCollection(collectionName string) error {
 	return nil
 }
 
-func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap, documents []Document) {
+func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], documents []Document) {
 	for _, document := range documents {
 		for _, key := range document.Keys {
 			fuzzyMap.Add(key, document.Content)

@@ -11,9 +11,9 @@ type Configuration struct {
 }
 
 type Document struct {
-	Keys      []string    `json:"keys"`
-	ExactKeys []string    `json:"exactKeys"`
-	Content   interface{} `json:"content"`
+	Keys      []string `json:"keys"`
+	ExactKeys []string `json:"exactKeys"`
+	Content   any      `json:"content"`
 }
 
 const (
