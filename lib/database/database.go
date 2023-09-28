@@ -19,7 +19,7 @@ func NewDatabase() *Database {
 }
 
 func (s *Database) CreateCollection(collectionName string, config Configuration, documents []Document) error {
-	if !s.collections.Has(collectionName) {
+	if s.collections.Has(collectionName) {
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
