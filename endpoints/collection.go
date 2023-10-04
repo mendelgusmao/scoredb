@@ -25,7 +25,7 @@ func create(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		return
 	}
 
-	err := db.CreateCollection(collectionName, request.Configuration, request.Documents)
+	err := db.CreateCollection(collectionName, request.FuzzySetConfiguration, request.Documents)
 
 	if err != nil {
 		writeError(w, http.StatusConflict, err)

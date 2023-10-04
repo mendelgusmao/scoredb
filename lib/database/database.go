@@ -29,21 +29,21 @@ func (s *Database) CollectionExists(collectionName string) bool {
 	return s.collections.Has(collectionName)
 }
 
-func (s *Database) CreateCollection(collectionName string, config Configuration, documents []Document) error {
+func (s *Database) CreateCollection(collectionName string, fuzzySetConfig FuzzySetConfiguration, documents []Document) error {
 	if s.CollectionExists(collectionName) {
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
 	fuzzyMap := fuzzymap.New[any](
 		fuzzymap.FuzzyMapConfig{
-			UseLevenshtein: config.UseLevenshtein,
-			GramSizeLower:  config.GramSizeLower,
-			GramSizeUpper:  config.GramSizeUpper,
-			MinScore:       config.MinScore,
+			UseLevenshtein: fuzzySetConfig.UseLevenshtein,
+			GramSizeLower:  fuzzySetConfig.GramSizeLower,
+			GramSizeUpper:  fuzzySetConfig.GramSizeUpper,
+			MinScore:       fuzzySetConfig.MinScore,
 			SetConfiguration: normalizer.SetConfiguration{
-				Synonyms:      config.Synonyms,
-				StopWords:     config.StopWords,
-				Transliterate: config.Transliterate,
+				Synonyms:      fuzzySetConfig.Synonyms,
+				StopWords:     fuzzySetConfig.StopWords,
+				Transliterate: fuzzySetConfig.Transliterate,
 			},
 		},
 	)
@@ -132,7 +132,7 @@ func (s *Database) GobDecode(input []byte) error {
 		return fmt.Errorf("[Set] %v", err)
 	}
 
-	collections := cmap.New[*fuzzymap.FuzzyMap[V]]()
+	collections := cmap.New[*fuzzymap.FuzzyMap[any]]()
 
 	for key, value := range databaseRepr.Collections {
 		collections.Set(key, value)

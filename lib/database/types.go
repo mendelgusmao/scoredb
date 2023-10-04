@@ -2,7 +2,7 @@ package database
 
 import "github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 
-type Configuration struct {
+type FuzzySetConfiguration struct {
 	UseLevenshtein bool    `json:"useLevenshtein,omitempty"`
 	GramSizeLower  int     `json:"gramSizeLower,omitempty"`
 	GramSizeUpper  int     `json:"gramSizeUpper,omitempty"`

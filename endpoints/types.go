@@ -11,7 +11,7 @@ var (
 )
 
 type createRequest struct {
-	database.Configuration
+	database.FuzzySetConfiguration
 	updateRequest
 }
 
