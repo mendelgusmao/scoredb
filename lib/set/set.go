@@ -1,6 +1,8 @@
 package set
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"hash/fnv"
 	"log"
@@ -50,4 +52,26 @@ func (s *Set[V]) hash(item V) uint64 {
 	h.Write([]byte(fmt.Sprintf("%v", item)))
 
 	return h.Sum64()
+}
+
+func (s *Set[V]) GobEncode() ([]byte, error) {
+	buffer := bytes.NewBuffer(nil)
+	enc := gob.NewEncoder(buffer)
+
+	if err := enc.Encode(s.items); err != nil {
+		return nil, fmt.Errorf("[Set] %v", err)
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (s *Set[V]) GobDecode(input []byte) error {
+	buffer := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buffer)
+
+	if err := dec.Decode(&s.items); err != nil {
+		return fmt.Errorf("[Set] %v", err)
+	}
+
+	return nil
 }
