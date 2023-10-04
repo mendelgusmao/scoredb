@@ -7,7 +7,7 @@ import (
 
 var (
 	Router = httprouter.New()
-	db     = database.NewDatabase()
+	DB     = database.NewDatabase()
 )
 
 type createRequest struct {
