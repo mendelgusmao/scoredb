@@ -1,6 +1,9 @@
 package database
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 	cmap "github.com/orcaman/concurrent-map/v2"
@@ -10,6 +13,10 @@ import (
 
 type Database struct {
 	collections cmap.ConcurrentMap[*fuzzymap.FuzzyMap[any]]
+}
+
+type DatabaseRepresentation struct {
+	Collections map[string]*fuzzymap.FuzzyMap[any]
 }
 
 func NewDatabase() *Database {
@@ -90,4 +97,46 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 			fuzzyMap.AddExact(key, document.Content)
 		}
 	}
+}
+
+func (s *Database) GobEncode() ([]byte, error) {
+	collections := make(map[string]*fuzzymap.FuzzyMap[any])
+
+	for collectionTuple := range s.collections.IterBuffered() {
+		collections[collectionTuple.Key] = collectionTuple.Val
+	}
+
+	databaseRepr := &DatabaseRepresentation{
+		Collections: collections,
+	}
+
+	buffer := bytes.NewBuffer(nil)
+	enc := gob.NewEncoder(buffer)
+
+	if err := enc.Encode(databaseRepr); err != nil {
+		return nil, fmt.Errorf("[Set] %v", err)
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (s *Database) GobDecode(input []byte) error {
+	buffer := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buffer)
+
+	databaseRepr := DatabaseRepresentation{
+		Collections: make(map[string]*fuzzymap.FuzzyMap[any]),
+	}
+
+	if err := dec.Decode(&databaseRepr); err != nil {
+		return fmt.Errorf("[Set] %v", err)
+	}
+
+	collections := cmap.New[*fuzzymap.FuzzyMap[V]]()
+
+	for key, value := range databaseRepr.Collections {
+		collections.Set(key, value)
+	}
+
+	return nil
 }
