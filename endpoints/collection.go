@@ -67,11 +67,6 @@ func update(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func snapshot(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	w.WriteHeader(http.StatusOK)
-	w.Write(DB.Snapshot())
-}
-
 func remove(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	collectionName := params.ByName("collectionName")
 

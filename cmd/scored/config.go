@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -9,8 +10,10 @@ import (
 var ScoreDB Specification
 
 type Specification struct {
-	Listen  string `default:":7363"`
-	Logging bool   `default:"false"`
+	Listen           string        `default:":7363"`
+	Logging          bool          `default:"false"`
+	SnapshotPath     string        `default:""`
+	SnapshotInterval time.Duration `default:"30s"`
 }
 
 func readConfig() error {

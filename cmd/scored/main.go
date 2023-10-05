@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/mendelgusmao/scoredb/endpoints"
+	"github.com/mendelgusmao/scoredb/lib/database/persistence"
 	"github.com/mendelgusmao/scoredb/middleware"
 )
 
@@ -13,6 +14,16 @@ func main() {
 
 	if err = readConfig(); err != nil {
 		log.Fatal(err)
+	}
+
+	if ScoreDB.SnapshotPath != "" {
+		persistence := persistence.NewPersistence(endpoints.DB, persistence.Configuration{
+			SnapshotPath:     ScoreDB.SnapshotPath,
+			SnapshotInterval: ScoreDB.SnapshotInterval,
+		})
+
+		go persistence.Load()
+		go persistence.Work()
 	}
 
 	log.Println("starting scoredb server at", ScoreDB.Listen)
