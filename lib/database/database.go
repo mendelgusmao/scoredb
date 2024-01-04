@@ -2,7 +2,7 @@ package database
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/json"
 
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
@@ -99,7 +99,7 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 	}
 }
 
-func (s *Database) GobEncode() ([]byte, error) {
+func (s *Database) MarshalJSON() ([]byte, error) {
 	collections := make(map[string]*fuzzymap.FuzzyMap[any])
 
 	for collectionTuple := range s.collections.IterBuffered() {
@@ -111,7 +111,7 @@ func (s *Database) GobEncode() ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	enc := gob.NewEncoder(buffer)
+	enc := json.NewEncoder(buffer)
 
 	if err := enc.Encode(databaseRepr); err != nil {
 		return nil, fmt.Errorf("[Set] %v", err)
@@ -120,9 +120,9 @@ func (s *Database) GobEncode() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (s *Database) GobDecode(input []byte) error {
+func (s *Database) UnmarshalJSON(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := gob.NewDecoder(buffer)
+	dec := json.NewDecoder(buffer)
 
 	databaseRepr := DatabaseRepresentation{
 		Collections: make(map[string]*fuzzymap.FuzzyMap[any]),
@@ -132,10 +132,8 @@ func (s *Database) GobDecode(input []byte) error {
 		return fmt.Errorf("[Set] %v", err)
 	}
 
-	collections := cmap.New[*fuzzymap.FuzzyMap[any]]()
-
 	for key, value := range databaseRepr.Collections {
-		collections.Set(key, value)
+		s.collections.Set(key, value)
 	}
 
 	return nil
