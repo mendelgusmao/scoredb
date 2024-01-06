@@ -26,8 +26,9 @@ type FuzzyMapConfig struct {
 }
 
 type FuzzyMapRepresentation[V any] struct {
-	Candidates map[string]*set.Set[V]
-	FuzzySet   *FuzzySet
+	NormalizerConfig normalizer.SetConfiguration
+	Candidates       map[string]*set.Set[V]
+	FuzzySet         *FuzzySet
 }
 
 type Match[V any] struct {
@@ -140,8 +141,9 @@ func (f *FuzzyMap[V]) MarshalJSON() ([]byte, error) {
 	}
 
 	fuzzyMapRepr := &FuzzyMapRepresentation[V]{
-		Candidates: candidates,
-		FuzzySet:   f.fuzzySet,
+		NormalizerConfig: f.normalizerConfig,
+		Candidates:       candidates,
+		FuzzySet:         f.fuzzySet,
 	}
 
 	buffer := bytes.NewBuffer(nil)
@@ -159,8 +161,9 @@ func (f *FuzzyMap[V]) UnmarshalJSON(input []byte) error {
 	dec := json.NewDecoder(buffer)
 
 	fuzzyMapRepr := FuzzyMapRepresentation[V]{
-		Candidates: make(map[string]*set.Set[V]),
-		FuzzySet:   &FuzzySet{},
+		NormalizerConfig: normalizer.SetConfiguration{},
+		Candidates:       make(map[string]*set.Set[V]),
+		FuzzySet:         &FuzzySet{},
 	}
 
 	if err := dec.Decode(&fuzzyMapRepr); err != nil {
@@ -173,8 +176,10 @@ func (f *FuzzyMap[V]) UnmarshalJSON(input []byte) error {
 		candidates.Set(key, value)
 	}
 
+	f.normalizerConfig = fuzzyMapRepr.NormalizerConfig
 	f.candidates = candidates
 	f.fuzzySet = fuzzyMapRepr.FuzzySet
+	f.ApplyNormalizer()
 
 	return nil
 }
