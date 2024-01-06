@@ -2,7 +2,7 @@ package fuzzymap
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 
 	"github.com/mendelgusmao/gofuzzyset"
@@ -134,7 +134,7 @@ func (fm *FuzzyMap[V]) fuzzyFind(key string) []Match[V] {
 	return matches
 }
 
-func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
+func (f *FuzzyMap[V]) MarshalJSON() ([]byte, error) {
 	candidates := make(map[string]*set.Set[V])
 
 	for candidateTuple := range f.candidates.IterBuffered() {
@@ -148,7 +148,7 @@ func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	enc := gob.NewEncoder(buffer)
+	enc := json.NewEncoder(buffer)
 
 	if err := enc.Encode(fuzzyMapRepr); err != nil {
 		return nil, fmt.Errorf("[Set] %v", err)
@@ -157,9 +157,9 @@ func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (f *FuzzyMap[V]) GobDecode(input []byte) error {
+func (f *FuzzyMap[V]) UnmarshalJSON(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := gob.NewDecoder(buffer)
+	dec := json.NewDecoder(buffer)
 
 	fuzzyMapRepr := FuzzyMapRepresentation[V]{
 		NormalizerConfig: normalizer.SetConfiguration{},
