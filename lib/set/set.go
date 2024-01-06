@@ -2,7 +2,7 @@ package set
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"hash/fnv"
 	"log"
@@ -54,37 +54,23 @@ func (s *Set[V]) hash(item V) uint64 {
 	return h.Sum64()
 }
 
-func (s *Set[V]) MarshalJSON() ([]byte, error) {
+func (s *Set[V]) GobEncode() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(buffer)
-	items := make([]any, len(s.items))
-	index := 0
+	enc := gob.NewEncoder(buffer)
 
-	for _, item := range s.items {
-		items[index] = item
-		index++
-	}
-
-	if err := enc.Encode(items); err != nil {
+	if err := enc.Encode(s.items); err != nil {
 		return nil, fmt.Errorf("[Set] %v", err)
 	}
 
 	return buffer.Bytes(), nil
 }
 
-func (s *Set[V]) UnmarshalJSON(input []byte) error {
+func (s *Set[V]) GobDecode(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := json.NewDecoder(buffer)
-	items := make([]V, 0)
+	dec := gob.NewDecoder(buffer)
 
-	if err := dec.Decode(&items); err != nil {
+	if err := dec.Decode(&s.items); err != nil {
 		return fmt.Errorf("[Set] %v", err)
-	}
-
-	s.items = make(map[uint64]V)
-
-	for _, item := range items {
-		s.Insert(item)
 	}
 
 	return nil

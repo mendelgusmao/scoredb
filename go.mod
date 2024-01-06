@@ -9,7 +9,4 @@ require (
 	golang.org/x/text v0.3.6
 )
 
-require (
-	github.com/drosseau/degob v0.0.0-20191126221224-efb72bcef901 // indirect
-	gitlab.com/drosseau/degob v0.0.0-20210223155345-9c3d88406ae2 // indirect
-)
+require github.com/mendelgusmao/gofuzzyset v0.0.3

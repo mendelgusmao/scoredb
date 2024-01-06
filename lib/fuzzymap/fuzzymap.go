@@ -2,7 +2,7 @@ package fuzzymap
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
@@ -133,7 +133,7 @@ func (fm *FuzzyMap[V]) fuzzyFind(key string) []Match[V] {
 	return matches
 }
 
-func (f *FuzzyMap[V]) MarshalJSON() ([]byte, error) {
+func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
 	candidates := make(map[string]*set.Set[V])
 
 	for candidateTuple := range f.candidates.IterBuffered() {
@@ -147,18 +147,18 @@ func (f *FuzzyMap[V]) MarshalJSON() ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(buffer)
+	enc := gob.NewEncoder(buffer)
 
 	if err := enc.Encode(fuzzyMapRepr); err != nil {
-		return nil, fmt.Errorf("[FuzzyMap] %v", err)
+		return nil, fmt.Errorf("[Set] %v", err)
 	}
 
 	return buffer.Bytes(), nil
 }
 
-func (f *FuzzyMap[V]) UnmarshalJSON(input []byte) error {
+func (f *FuzzyMap[V]) GobDecode(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := json.NewDecoder(buffer)
+	dec := gob.NewDecoder(buffer)
 
 	fuzzyMapRepr := FuzzyMapRepresentation[V]{
 		NormalizerConfig: normalizer.SetConfiguration{},
@@ -167,7 +167,7 @@ func (f *FuzzyMap[V]) UnmarshalJSON(input []byte) error {
 	}
 
 	if err := dec.Decode(&fuzzyMapRepr); err != nil {
-		return fmt.Errorf("[FuzzyMap] %v", err)
+		return fmt.Errorf("[Set] %v", err)
 	}
 
 	candidates := cmap.New[*set.Set[V]]()

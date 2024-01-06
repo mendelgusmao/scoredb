@@ -3,7 +3,7 @@ package persistence
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"os"
@@ -38,7 +38,7 @@ func (p *Persistence) Load() {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	err = json.NewDecoder(reader).Decode(p.database)
+	err = gob.NewDecoder(reader).Decode(p.database)
 
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +49,7 @@ func (p *Persistence) Load() {
 
 func (p *Persistence) Save() error {
 	buffer := bytes.NewBuffer(nil)
-	err := json.NewEncoder(buffer).Encode(p.database)
+	err := gob.NewEncoder(buffer).Encode(p.database)
 
 	if err != nil {
 		return fmt.Errorf("[Persistence.Save] %v", err)

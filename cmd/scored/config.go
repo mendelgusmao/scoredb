@@ -13,7 +13,7 @@ type Specification struct {
 	Listen           string        `default:":7363"`
 	Logging          bool          `default:"false"`
 	SnapshotPath     string        `default:""`
-	SnapshotInterval time.Duration `default:"10s"`
+	SnapshotInterval time.Duration `default:"30s"`
 }
 
 func readConfig() error {
