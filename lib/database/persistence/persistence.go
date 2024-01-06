@@ -15,6 +15,7 @@ import (
 type Persistence struct {
 	database *database.Database
 	config   Configuration
+	loading  bool
 }
 
 func NewPersistence(database *database.Database, config Configuration) *Persistence {
@@ -24,10 +25,23 @@ func NewPersistence(database *database.Database, config Configuration) *Persiste
 	}
 }
 
+func (p *Persistence) Loading() bool {
+	return p.loading
+}
+
 func (p *Persistence) Load() {
+	go p.load()
+}
+
+func (p *Persistence) load() {
+	p.loading = true
+	defer func() { p.loading = false }()
+
 	if _, err := os.Stat(p.config.SnapshotPath); os.IsNotExist(err) {
 		return
 	}
+
+	log.Println("[Persistence.Load] Loading database")
 
 	file, err := os.Open(p.config.SnapshotPath)
 
@@ -44,7 +58,7 @@ func (p *Persistence) Load() {
 		log.Fatal(err)
 	}
 
-	log.Println("[Persistence.Load] Loaded database")
+	log.Println("[Persistence.Load] Database is loaded")
 }
 
 func (p *Persistence) Save() error {
@@ -70,6 +84,10 @@ func (p *Persistence) Work() {
 		for {
 			select {
 			case <-ticker.C:
+				if p.loading {
+					continue
+				}
+
 				err := p.Save()
 
 				if err != nil {

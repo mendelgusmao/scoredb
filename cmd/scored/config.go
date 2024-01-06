@@ -14,6 +14,7 @@ type Specification struct {
 	Logging          bool          `default:"false"`
 	SnapshotPath     string        `default:""`
 	SnapshotInterval time.Duration `default:"1h"`
+	SnapshotWaitLoad bool          `default:"false"`
 }
 
 func readConfig() error {

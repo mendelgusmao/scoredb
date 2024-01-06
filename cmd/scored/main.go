@@ -10,29 +10,38 @@ import (
 )
 
 func main() {
-	var err error
+	var (
+		err     error
+		persist *persistence.Persistence
+	)
 
 	if err = readConfig(); err != nil {
 		log.Fatal(err)
 	}
 
 	if ScoreDB.SnapshotPath != "" {
-		persistence := persistence.NewPersistence(endpoints.DB, persistence.Configuration{
-			SnapshotPath:     ScoreDB.SnapshotPath,
-			SnapshotInterval: ScoreDB.SnapshotInterval,
-		})
+		persist = persistence.NewPersistence(
+			endpoints.DB,
+			persistence.Configuration{
+				SnapshotPath:     ScoreDB.SnapshotPath,
+				SnapshotInterval: ScoreDB.SnapshotInterval,
+				SnapshotWaitLoad: ScoreDB.SnapshotWaitLoad,
+			},
+		)
 
-		go persistence.Load()
-		go persistence.Work()
+		persist.Load()
+		persist.Work()
 	}
 
 	log.Println("starting scoredb server at", ScoreDB.Listen)
 
+	router := middleware.NewLoading(endpoints.Router, ScoreDB.SnapshotWaitLoad, persist)
+
 	if ScoreDB.Logging {
-		loggingRouter := middleware.NewLogger(endpoints.Router)
+		loggingRouter := middleware.NewLogger(router)
 		err = http.ListenAndServe(ScoreDB.Listen, loggingRouter)
 	} else {
-		err = http.ListenAndServe(ScoreDB.Listen, endpoints.Router)
+		err = http.ListenAndServe(ScoreDB.Listen, router)
 	}
 
 	log.Fatal(err)
