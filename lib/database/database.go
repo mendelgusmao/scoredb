@@ -28,15 +28,17 @@ func (s *Database) CreateCollection(collectionName string, config Configuration,
 	}
 
 	fuzzyMap := fuzzymap.New[any](
-		config.UseLevenshtein,
-		config.GramSizeLower,
-		config.GramSizeUpper,
-		config.MinScore,
-		normalizer.NewDefaultSet(&normalizer.SetConfiguration{
-			config.Synonyms,
-			config.StopWords,
-			config.Transliterate,
-		}),
+		fuzzymap.FuzzyMapConfig{
+			UseLevenshtein: config.UseLevenshtein,
+			GramSizeLower:  config.GramSizeLower,
+			GramSizeUpper:  config.GramSizeUpper,
+			MinScore:       config.MinScore,
+			SetConfiguration: normalizer.SetConfiguration{
+				Synonyms:      config.Synonyms,
+				StopWords:     config.StopWords,
+				Transliterate: config.Transliterate,
+			},
+		},
 	)
 
 	s.addDocumentsToFuzzyMap(fuzzyMap, documents)
