@@ -8,9 +8,18 @@ import (
 )
 
 type FuzzyMap[V any] struct {
-	candidates    cmap.ConcurrentMap[*set.Set[V]]
-	fuzzySet      *gofuzzyset.FuzzySet
-	keyNormalizer normalizer.KeyNormalizer
+	candidates       cmap.ConcurrentMap[*set.Set[V]]
+	fuzzySet         *gofuzzyset.FuzzySet
+	normalizerConfig normalizer.SetConfiguration
+	keyNormalizer    normalizer.KeyNormalizer
+}
+
+type FuzzyMapConfig struct {
+	UseLevenshtein bool
+	GramSizeLower  int
+	GramSizeUpper  int
+	MinScore       float64
+	normalizer.SetConfiguration
 }
 
 type Match[V any] struct {
@@ -18,18 +27,26 @@ type Match[V any] struct {
 	Content V    `json:"content"`
 }
 
-func New[V any](useLevenshtein bool, gramSizeLower int, gramSizeUpper int, minScore float64, keyNormalizer normalizer.KeyNormalizer) *FuzzyMap[V] {
-	return &FuzzyMap[V]{
-		candidates: cmap.New[*set.Set[V]](), // map[string, []any]
+func New[V any](config FuzzyMapConfig) *FuzzyMap[V] {
+	fuzzyMap := &FuzzyMap[V]{
+		candidates: cmap.New[*set.Set[V]](),
 		fuzzySet: gofuzzyset.New(
 			[]string{},
-			useLevenshtein,
-			gramSizeLower,
-			gramSizeUpper,
-			minScore,
+			config.UseLevenshtein,
+			config.GramSizeLower,
+			config.GramSizeUpper,
+			config.MinScore,
 		),
-		keyNormalizer: keyNormalizer,
+		normalizerConfig: config.SetConfiguration,
 	}
+
+	fuzzyMap.ApplyNormalizer()
+
+	return fuzzyMap
+}
+
+func (fm *FuzzyMap[V]) ApplyNormalizer() {
+	fm.keyNormalizer = normalizer.NewDefaultSet(fm.normalizerConfig)
 }
 
 func (fm *FuzzyMap[V]) Add(key string, item V) {

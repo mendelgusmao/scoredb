@@ -10,7 +10,7 @@ type SetConfiguration struct {
 	Transliterate bool              `json:"transliterate,omitempty"`
 }
 
-func NewDefaultSet(config *SetConfiguration) *Set {
+func NewDefaultSet(config SetConfiguration) *Set {
 	normalizers := []KeyNormalizer{
 		NewBasicFilter(),
 	}
