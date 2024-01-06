@@ -1,5 +1,3 @@
-github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4dN7jwJOQ1U=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
@@ -8,8 +6,6 @@ github.com/mendelgusmao/gofuzzyset v0.0.3 h1:GXqGbwxjpN2gSP5W2LEyNNgLCiv4kRuuGWl
 github.com/mendelgusmao/gofuzzyset v0.0.3/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
 github.com/mendelgusmao/gofuzzyset v0.0.4 h1:JrR3+IrxuvWAvwmafymCBA9gSf7DQwbP6i+iYHN8aPQ=
 github.com/mendelgusmao/gofuzzyset v0.0.4/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
-github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240106192656-628f1f9b3223 h1:ephyzkRC3Sa2toyJm2egsI7A0/m3RHk3ZgXuwYP8mec=
-github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240106192656-628f1f9b3223/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
 github.com/orcaman/concurrent-map/v2 v2.0.0 h1:iSMwuBQvQ1nX5i9gYuGMiSy0fjWHmazdjF+NdSO9JzI=
 github.com/orcaman/concurrent-map/v2 v2.0.0/go.mod h1:9Eq3TG2oBe5FirmYWQfYO5iH1q0Jv47PLaNK++uCdOM=
 golang.org/x/text v0.3.6 h1:aRYxNxv6iGQlyVaZmk6ZgYEDa+Jg18DxebPSrd6bg1M=

@@ -2,7 +2,7 @@ package database
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
@@ -99,7 +99,7 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 	}
 }
 
-func (s *Database) MarshalJSON() ([]byte, error) {
+func (s *Database) GobEncode() ([]byte, error) {
 	collections := make(map[string]*fuzzymap.FuzzyMap[any])
 
 	for collectionTuple := range s.collections.IterBuffered() {
@@ -111,7 +111,7 @@ func (s *Database) MarshalJSON() ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(buffer)
+	enc := gob.NewEncoder(buffer)
 
 	if err := enc.Encode(databaseRepr); err != nil {
 		return nil, fmt.Errorf("[Set] %v", err)
@@ -120,9 +120,9 @@ func (s *Database) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (s *Database) UnmarshalJSON(input []byte) error {
+func (s *Database) GobDecode(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := json.NewDecoder(buffer)
+	dec := gob.NewDecoder(buffer)
 
 	databaseRepr := DatabaseRepresentation{
 		Collections: make(map[string]*fuzzymap.FuzzyMap[any]),

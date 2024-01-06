@@ -9,6 +9,4 @@ require (
 	golang.org/x/text v0.3.6
 )
 
-require github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240106192656-628f1f9b3223
-
-require github.com/davecgh/go-spew v1.1.1 // indirect
+require github.com/mendelgusmao/gofuzzyset v0.0.4

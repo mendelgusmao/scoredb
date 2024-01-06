@@ -2,12 +2,10 @@ package set
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"hash/fnv"
 	"log"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type Set[V any] struct {
@@ -56,9 +54,9 @@ func (s *Set[V]) hash(item V) uint64 {
 	return h.Sum64()
 }
 
-func (s *Set[V]) MarshalJSON() ([]byte, error) {
+func (s *Set[V]) GobEncode() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
-	enc := json.NewEncoder(buffer)
+	enc := gob.NewEncoder(buffer)
 
 	items := make([]V, s.Len())
 	index := 0
@@ -74,12 +72,10 @@ func (s *Set[V]) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (s *Set[V]) UnmarshalJSON(input []byte) error {
+func (s *Set[V]) GobDecode(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := json.NewDecoder(buffer)
+	dec := gob.NewDecoder(buffer)
 	items := make([]V, 0)
-
-	spew.Dump(items)
 
 	if err := dec.Decode(&items); err != nil {
 		return fmt.Errorf("[Set.GobDecode] %v", err)
