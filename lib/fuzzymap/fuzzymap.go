@@ -1,10 +1,14 @@
 package fuzzymap
 
 import (
+	"bytes"
+	"encoding/gob"
+	"fmt"
+
+	"github.com/mendelgusmao/gofuzzyset"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 	"github.com/mendelgusmao/scoredb/lib/set"
 	cmap "github.com/orcaman/concurrent-map/v2"
-	"github.com/samprakos/gofuzzyset"
 )
 
 type FuzzyMap[V any] struct {
@@ -20,6 +24,12 @@ type FuzzyMapConfig struct {
 	GramSizeUpper  int
 	MinScore       float64
 	normalizer.SetConfiguration
+}
+
+type FuzzyMapRepresentation[V any] struct {
+	NormalizerConfig normalizer.SetConfiguration
+	Candidates       map[string]*set.Set[V]
+	FuzzySet         *gofuzzyset.FuzzySet
 }
 
 type Match[V any] struct {
@@ -122,4 +132,55 @@ func (fm *FuzzyMap[V]) fuzzyFind(key string) []Match[V] {
 	}
 
 	return matches
+}
+
+func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
+	candidates := make(map[string]*set.Set[V])
+
+	for candidateTuple := range f.candidates.IterBuffered() {
+		candidates[candidateTuple.Key] = candidateTuple.Val
+	}
+
+	fuzzyMapRepr := &FuzzyMapRepresentation[V]{
+		NormalizerConfig: f.normalizerConfig,
+		Candidates:       candidates,
+		FuzzySet:         f.fuzzySet,
+	}
+
+	buffer := bytes.NewBuffer(nil)
+	enc := gob.NewEncoder(buffer)
+
+	if err := enc.Encode(fuzzyMapRepr); err != nil {
+		return nil, fmt.Errorf("[Set] %v", err)
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (f *FuzzyMap[V]) GobDecode(input []byte) error {
+	buffer := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buffer)
+
+	fuzzyMapRepr := FuzzyMapRepresentation[V]{
+		NormalizerConfig: normalizer.SetConfiguration{},
+		Candidates:       make(map[string]*set.Set[V]),
+		FuzzySet:         &gofuzzyset.FuzzySet{},
+	}
+
+	if err := dec.Decode(&fuzzyMapRepr); err != nil {
+		return fmt.Errorf("[Set] %v", err)
+	}
+
+	candidates := cmap.New[*set.Set[V]]()
+
+	for key, value := range fuzzyMapRepr.Candidates {
+		candidates.Set(key, value)
+	}
+
+	f.normalizerConfig = fuzzyMapRepr.NormalizerConfig
+	f.candidates = candidates
+	f.fuzzySet = fuzzyMapRepr.FuzzySet
+	f.ApplyNormalizer()
+
+	return nil
 }

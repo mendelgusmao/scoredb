@@ -1,6 +1,9 @@
 package database
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 	cmap "github.com/orcaman/concurrent-map/v2"
@@ -10,6 +13,10 @@ import (
 
 type Database struct {
 	collections cmap.ConcurrentMap[*fuzzymap.FuzzyMap[any]]
+}
+
+type DatabaseRepresentation struct {
+	Collections map[string]*fuzzymap.FuzzyMap[any]
 }
 
 func NewDatabase() *Database {
@@ -22,21 +29,21 @@ func (s *Database) CollectionExists(collectionName string) bool {
 	return s.collections.Has(collectionName)
 }
 
-func (s *Database) CreateCollection(collectionName string, config Configuration, documents []Document) error {
+func (s *Database) CreateCollection(collectionName string, fuzzySetConfig FuzzySetConfiguration, documents []Document) error {
 	if s.CollectionExists(collectionName) {
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
 	fuzzyMap := fuzzymap.New[any](
 		fuzzymap.FuzzyMapConfig{
-			UseLevenshtein: config.UseLevenshtein,
-			GramSizeLower:  config.GramSizeLower,
-			GramSizeUpper:  config.GramSizeUpper,
-			MinScore:       config.MinScore,
+			UseLevenshtein: fuzzySetConfig.UseLevenshtein,
+			GramSizeLower:  fuzzySetConfig.GramSizeLower,
+			GramSizeUpper:  fuzzySetConfig.GramSizeUpper,
+			MinScore:       fuzzySetConfig.MinScore,
 			SetConfiguration: normalizer.SetConfiguration{
-				Synonyms:      config.Synonyms,
-				StopWords:     config.StopWords,
-				Transliterate: config.Transliterate,
+				Synonyms:      fuzzySetConfig.Synonyms,
+				StopWords:     fuzzySetConfig.StopWords,
+				Transliterate: fuzzySetConfig.Transliterate,
 			},
 		},
 	)
@@ -90,4 +97,44 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 			fuzzyMap.AddExact(key, document.Content)
 		}
 	}
+}
+
+func (s *Database) GobEncode() ([]byte, error) {
+	collections := make(map[string]*fuzzymap.FuzzyMap[any])
+
+	for collectionTuple := range s.collections.IterBuffered() {
+		collections[collectionTuple.Key] = collectionTuple.Val
+	}
+
+	databaseRepr := &DatabaseRepresentation{
+		Collections: collections,
+	}
+
+	buffer := bytes.NewBuffer(nil)
+	enc := gob.NewEncoder(buffer)
+
+	if err := enc.Encode(databaseRepr); err != nil {
+		return nil, fmt.Errorf("[Set] %v", err)
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (s *Database) GobDecode(input []byte) error {
+	buffer := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buffer)
+
+	databaseRepr := DatabaseRepresentation{
+		Collections: make(map[string]*fuzzymap.FuzzyMap[any]),
+	}
+
+	if err := dec.Decode(&databaseRepr); err != nil {
+		return fmt.Errorf("[Set] %v", err)
+	}
+
+	for key, value := range databaseRepr.Collections {
+		s.collections.Set(key, value)
+	}
+
+	return nil
 }

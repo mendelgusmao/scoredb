@@ -25,7 +25,7 @@ func create(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		return
 	}
 
-	err := db.CreateCollection(collectionName, request.Configuration, request.Documents)
+	err := DB.CreateCollection(collectionName, request.FuzzySetConfiguration, request.Documents)
 
 	if err != nil {
 		writeError(w, http.StatusConflict, err)
@@ -39,7 +39,7 @@ func query(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	collectionName := params.ByName("collectionName")
 	key := r.FormValue("key")
 
-	entries, err := db.Query(collectionName, key)
+	entries, err := DB.Query(collectionName, key)
 
 	if err != nil {
 		writeError(w, http.StatusNotFound, err)
@@ -59,7 +59,7 @@ func update(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		return
 	}
 
-	if err := db.UpdateCollection(collectionName, request.Documents); err != nil {
+	if err := DB.UpdateCollection(collectionName, request.Documents); err != nil {
 		writeError(w, http.StatusNotFound, err)
 		return
 	}
@@ -70,7 +70,7 @@ func update(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 func remove(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	collectionName := params.ByName("collectionName")
 
-	if err := db.RemoveCollection(collectionName); err != nil {
+	if err := DB.RemoveCollection(collectionName); err != nil {
 		writeError(w, http.StatusNotFound, err)
 		return
 	}
