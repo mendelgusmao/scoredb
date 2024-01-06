@@ -132,10 +132,8 @@ func (s *Database) UnmarshalJSON(input []byte) error {
 		return fmt.Errorf("[Set] %v", err)
 	}
 
-	collections := cmap.New[*fuzzymap.FuzzyMap[any]]()
-
 	for key, value := range databaseRepr.Collections {
-		collections.Set(key, value)
+		s.collections.Set(key, value)
 	}
 
 	return nil
