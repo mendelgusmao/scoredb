@@ -9,4 +9,4 @@ require (
 	golang.org/x/text v0.3.6
 )
 
-require github.com/mendelgusmao/gofuzzyset v0.0.3
+require github.com/mendelgusmao/gofuzzyset v0.0.4

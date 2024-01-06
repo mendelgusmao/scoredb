@@ -4,6 +4,8 @@ github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dv
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/mendelgusmao/gofuzzyset v0.0.3 h1:GXqGbwxjpN2gSP5W2LEyNNgLCiv4kRuuGWlWJVyBbFU=
 github.com/mendelgusmao/gofuzzyset v0.0.3/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
+github.com/mendelgusmao/gofuzzyset v0.0.4 h1:JrR3+IrxuvWAvwmafymCBA9gSf7DQwbP6i+iYHN8aPQ=
+github.com/mendelgusmao/gofuzzyset v0.0.4/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
 github.com/orcaman/concurrent-map/v2 v2.0.0 h1:iSMwuBQvQ1nX5i9gYuGMiSy0fjWHmazdjF+NdSO9JzI=
 github.com/orcaman/concurrent-map/v2 v2.0.0/go.mod h1:9Eq3TG2oBe5FirmYWQfYO5iH1q0Jv47PLaNK++uCdOM=
 golang.org/x/text v0.3.6 h1:aRYxNxv6iGQlyVaZmk6ZgYEDa+Jg18DxebPSrd6bg1M=
