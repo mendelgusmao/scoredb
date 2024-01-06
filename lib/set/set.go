@@ -58,8 +58,15 @@ func (s *Set[V]) GobEncode() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
 	enc := gob.NewEncoder(buffer)
 
-	if err := enc.Encode(s.items); err != nil {
-		return nil, fmt.Errorf("[Set] %v", err)
+	items := make([]V, s.Len())
+	index := 0
+
+	s.Do(func(item V) {
+		items[index] = item
+	})
+
+	if err := enc.Encode(items); err != nil {
+		return nil, fmt.Errorf("[Set.GobEncode] %v", err)
 	}
 
 	return buffer.Bytes(), nil
@@ -68,9 +75,16 @@ func (s *Set[V]) GobEncode() ([]byte, error) {
 func (s *Set[V]) GobDecode(input []byte) error {
 	buffer := bytes.NewBuffer(input)
 	dec := gob.NewDecoder(buffer)
+	items := make([]V, 0)
 
-	if err := dec.Decode(&s.items); err != nil {
-		return fmt.Errorf("[Set] %v", err)
+	if err := dec.Decode(&items); err != nil {
+		return fmt.Errorf("[Set.GobDecode] %v", err)
+	}
+
+	s.items = make(map[uint64]V)
+
+	for _, item := range items {
+		s.Insert(item)
 	}
 
 	return nil
