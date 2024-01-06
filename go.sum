@@ -8,6 +8,8 @@ github.com/mendelgusmao/gofuzzyset v0.0.3 h1:GXqGbwxjpN2gSP5W2LEyNNgLCiv4kRuuGWl
 github.com/mendelgusmao/gofuzzyset v0.0.3/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
 github.com/mendelgusmao/gofuzzyset v0.0.4-0.20231208190426-992306f2745a h1:six8q2PMfPHQv8FstSwyx35kQEK/itMFAt5maH7Uvag=
 github.com/mendelgusmao/gofuzzyset v0.0.4-0.20231208190426-992306f2745a/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
+github.com/mendelgusmao/gofuzzyset v0.0.4 h1:JrR3+IrxuvWAvwmafymCBA9gSf7DQwbP6i+iYHN8aPQ=
+github.com/mendelgusmao/gofuzzyset v0.0.4/go.mod h1:g+C5lWniVPNTgjF5G3qkkMqkIOWB1iA4IXv8lrK/EbA=
 github.com/orcaman/concurrent-map/v2 v2.0.0 h1:iSMwuBQvQ1nX5i9gYuGMiSy0fjWHmazdjF+NdSO9JzI=
 github.com/orcaman/concurrent-map/v2 v2.0.0/go.mod h1:9Eq3TG2oBe5FirmYWQfYO5iH1q0Jv47PLaNK++uCdOM=
 gitlab.com/drosseau/degob v0.0.0-20210223155345-9c3d88406ae2 h1:qjSQ8sL/BZJB9CFZvdmpawjbD2B2/wDylwNFe30lR0w=
