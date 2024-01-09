@@ -9,4 +9,9 @@ require (
 	golang.org/x/text v0.3.6
 )
 
-require github.com/mendelgusmao/gofuzzyset v0.0.4
+require (
+	github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109172924-6eb4d09108c8
+	github.com/vmihailenco/msgpack/v5 v5.4.1
+)
+
+require github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

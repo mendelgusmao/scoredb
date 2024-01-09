@@ -2,10 +2,11 @@ package set
 
 import (
 	"bytes"
-	"encoding/gob"
 	"fmt"
 	"hash/fnv"
 	"log"
+
+	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
 type Set[V any] struct {
@@ -54,9 +55,9 @@ func (s *Set[V]) hash(item V) uint64 {
 	return h.Sum64()
 }
 
-func (s *Set[V]) GobEncode() ([]byte, error) {
+func (s *Set[V]) MarshalMsgpack() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
-	enc := gob.NewEncoder(buffer)
+	enc := msgpack.NewEncoder(buffer)
 
 	items := make([]V, s.Len())
 	index := 0
@@ -66,19 +67,19 @@ func (s *Set[V]) GobEncode() ([]byte, error) {
 	})
 
 	if err := enc.Encode(items); err != nil {
-		return nil, fmt.Errorf("[Set.GobEncode] %v", err)
+		return nil, fmt.Errorf("[Set.MarshalMsgpack] %v", err)
 	}
 
 	return buffer.Bytes(), nil
 }
 
-func (s *Set[V]) GobDecode(input []byte) error {
+func (s *Set[V]) UnmarshalMsgpack(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := gob.NewDecoder(buffer)
+	dec := msgpack.NewDecoder(buffer)
 	items := make([]V, 0)
 
 	if err := dec.Decode(&items); err != nil {
-		return fmt.Errorf("[Set.GobDecode] %v", err)
+		return fmt.Errorf("[Set.UnmarshalMsgpack] %v", err)
 	}
 
 	s.items = make(map[uint64]V)
