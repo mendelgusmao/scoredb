@@ -4,8 +4,8 @@ github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4d
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
-github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109172924-6eb4d09108c8 h1:8yMhMgurlCPtaF9pJHMLbzXnT2Vzxx/7uf1Q2veZc2U=
-github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109172924-6eb4d09108c8/go.mod h1:L/9D3nKMmYQMdqGtWrVc5loThrt21PyBFEH5wEopP/w=
+github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109174406-1b771c2d5196 h1:/c91AukH4qgjrn8Nf8G2fXTFHINHmmrsHQF8mWnC9O8=
+github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109174406-1b771c2d5196/go.mod h1:WErvCOioNeAHISPpYCOh7IYDKLRfihRN3B084CR09Rg=
 github.com/orcaman/concurrent-map/v2 v2.0.0 h1:iSMwuBQvQ1nX5i9gYuGMiSy0fjWHmazdjF+NdSO9JzI=
 github.com/orcaman/concurrent-map/v2 v2.0.0/go.mod h1:9Eq3TG2oBe5FirmYWQfYO5iH1q0Jv47PLaNK++uCdOM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

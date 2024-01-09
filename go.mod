@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109172924-6eb4d09108c8
+	github.com/mendelgusmao/gofuzzyset v0.0.5-0.20240109174406-1b771c2d5196
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 )
 
