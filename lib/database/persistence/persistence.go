@@ -3,13 +3,13 @@ package persistence
 import (
 	"bufio"
 	"bytes"
-	"encoding/gob"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/mendelgusmao/scoredb/lib/database"
+	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
 type Persistence struct {
@@ -52,7 +52,7 @@ func (p *Persistence) load() {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	err = gob.NewDecoder(reader).Decode(p.database)
+	err = msgpack.NewDecoder(reader).Decode(p.database)
 
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +63,7 @@ func (p *Persistence) load() {
 
 func (p *Persistence) Save() error {
 	buffer := bytes.NewBuffer(nil)
-	err := gob.NewEncoder(buffer).Encode(p.database)
+	err := msgpack.NewEncoder(buffer).Encode(p.database)
 
 	if err != nil {
 		return fmt.Errorf("[Persistence.Save] %v", err)

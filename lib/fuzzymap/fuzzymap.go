@@ -2,13 +2,13 @@ package fuzzymap
 
 import (
 	"bytes"
-	"encoding/gob"
 	"fmt"
 
 	"github.com/mendelgusmao/gofuzzyset"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
 	"github.com/mendelgusmao/scoredb/lib/set"
 	cmap "github.com/orcaman/concurrent-map/v2"
+	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
 type FuzzyMap[V any] struct {
@@ -134,7 +134,7 @@ func (fm *FuzzyMap[V]) fuzzyFind(key string) []Match[V] {
 	return matches
 }
 
-func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
+func (f *FuzzyMap[V]) MarshalMsgpack() ([]byte, error) {
 	candidates := make(map[string]*set.Set[V])
 
 	for candidateTuple := range f.candidates.IterBuffered() {
@@ -148,7 +148,7 @@ func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	enc := gob.NewEncoder(buffer)
+	enc := msgpack.NewEncoder(buffer)
 
 	if err := enc.Encode(fuzzyMapRepr); err != nil {
 		return nil, fmt.Errorf("[Set] %v", err)
@@ -157,9 +157,9 @@ func (f *FuzzyMap[V]) GobEncode() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (f *FuzzyMap[V]) GobDecode(input []byte) error {
+func (f *FuzzyMap[V]) UnmarshalMsgpack(input []byte) error {
 	buffer := bytes.NewBuffer(input)
-	dec := gob.NewDecoder(buffer)
+	dec := msgpack.NewDecoder(buffer)
 
 	fuzzyMapRepr := FuzzyMapRepresentation[V]{
 		NormalizerConfig: normalizer.SetConfiguration{},
