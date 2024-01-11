@@ -17,11 +17,6 @@ type FuzzySetRepresentation struct {
 	MinScore        float64
 }
 
-type ItemRepresentation struct {
-	NormalizedValue string
-	VectorNormal    float64
-}
-
 func (f *FuzzySet) MarshalMsgpack() ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
 	enc := msgpack.NewEncoder(buffer)
