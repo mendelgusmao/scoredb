@@ -7,7 +7,7 @@ import (
 
 var (
 	Router = httprouter.New()
-	DB     = database.NewDatabase()
+	DB     = database.NewDatabase[any]()
 )
 
 type createRequest struct {
@@ -16,5 +16,5 @@ type createRequest struct {
 }
 
 type updateRequest struct {
-	Documents []database.Document `json:"documents"`
+	Documents []database.Document[any] `json:"documents"`
 }

@@ -11,30 +11,30 @@ import (
 	"fmt"
 )
 
-type Database struct {
-	collections cmap.ConcurrentMap[*fuzzymap.FuzzyMap[any]]
+type Database[T any] struct {
+	collections cmap.ConcurrentMap[*fuzzymap.FuzzyMap[T]]
 }
 
-type DatabaseRepresentation struct {
-	Collections map[string]*fuzzymap.FuzzyMap[any]
+type DatabaseRepresentation[T any] struct {
+	Collections map[string]*fuzzymap.FuzzyMap[T]
 }
 
-func NewDatabase() *Database {
-	return &Database{
-		collections: cmap.New[*fuzzymap.FuzzyMap[any]](),
+func NewDatabase[T any]() *Database[T] {
+	return &Database[T]{
+		collections: cmap.New[*fuzzymap.FuzzyMap[T]](),
 	}
 }
 
-func (s *Database) CollectionExists(collectionName string) bool {
+func (s *Database[T]) CollectionExists(collectionName string) bool {
 	return s.collections.Has(collectionName)
 }
 
-func (s *Database) CreateCollection(collectionName string, fuzzySetConfig FuzzySetConfiguration, documents []Document) error {
+func (s *Database[T]) CreateCollection(collectionName string, fuzzySetConfig FuzzySetConfiguration, documents []Document[T]) error {
 	if s.CollectionExists(collectionName) {
 		return fmt.Errorf(collectionAlreadyExistsError, collectionName)
 	}
 
-	fuzzyMap := fuzzymap.New[any](
+	fuzzyMap := fuzzymap.New[T](
 		fuzzymap.FuzzyMapConfig{
 			UseLevenshtein: fuzzySetConfig.UseLevenshtein,
 			GramSizeLower:  fuzzySetConfig.GramSizeLower,
@@ -55,7 +55,7 @@ func (s *Database) CreateCollection(collectionName string, fuzzySetConfig FuzzyS
 	return nil
 }
 
-func (s *Database) UpdateCollection(collectionName string, documents []Document) error {
+func (s *Database[T]) UpdateCollection(collectionName string, documents []Document[T]) error {
 	fuzzyMap, ok := s.collections.Get(collectionName)
 
 	if !ok {
@@ -67,17 +67,17 @@ func (s *Database) UpdateCollection(collectionName string, documents []Document)
 	return nil
 }
 
-func (s *Database) Query(collectionName, key string) ([]fuzzymap.Match[any], error) {
+func (s *Database[T]) Query(collectionName, key string) ([]fuzzymap.Match[T], error) {
 	fuzzyMap, ok := s.collections.Get(collectionName)
 
 	if !ok {
-		return []fuzzymap.Match[any]{}, fmt.Errorf(collectionDoesntExistError, "Get", collectionName)
+		return []fuzzymap.Match[T]{}, fmt.Errorf(collectionDoesntExistError, "Get", collectionName)
 	}
 
 	return fuzzyMap.Get(key), nil
 }
 
-func (s *Database) RemoveCollection(collectionName string) error {
+func (s *Database[T]) RemoveCollection(collectionName string) error {
 	if !s.collections.Has(collectionName) {
 		return fmt.Errorf(collectionDoesntExistError, "RemoveCollection", collectionName)
 	}
@@ -87,7 +87,7 @@ func (s *Database) RemoveCollection(collectionName string) error {
 	return nil
 }
 
-func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], documents []Document) {
+func (s *Database[T]) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[T], documents []Document[T]) {
 	for _, document := range documents {
 		for _, key := range document.Keys {
 			fuzzyMap.Add(key, document.Content)
@@ -99,14 +99,14 @@ func (s *Database) addDocumentsToFuzzyMap(fuzzyMap *fuzzymap.FuzzyMap[any], docu
 	}
 }
 
-func (s *Database) MarshalMsgpack() ([]byte, error) {
-	collections := make(map[string]*fuzzymap.FuzzyMap[any])
+func (s *Database[T]) MarshalMsgpack() ([]byte, error) {
+	collections := make(map[string]*fuzzymap.FuzzyMap[T])
 
 	for collectionTuple := range s.collections.IterBuffered() {
 		collections[collectionTuple.Key] = collectionTuple.Val
 	}
 
-	databaseRepr := &DatabaseRepresentation{
+	databaseRepr := &DatabaseRepresentation[T]{
 		Collections: collections,
 	}
 
@@ -120,12 +120,12 @@ func (s *Database) MarshalMsgpack() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (s *Database) UnmarshalMsgpack(input []byte) error {
+func (s *Database[T]) UnmarshalMsgpack(input []byte) error {
 	buffer := bytes.NewBuffer(input)
 	dec := msgpack.NewDecoder(buffer)
 
-	databaseRepr := DatabaseRepresentation{
-		Collections: make(map[string]*fuzzymap.FuzzyMap[any]),
+	databaseRepr := DatabaseRepresentation[T]{
+		Collections: make(map[string]*fuzzymap.FuzzyMap[T]),
 	}
 
 	if err := dec.Decode(&databaseRepr); err != nil {
