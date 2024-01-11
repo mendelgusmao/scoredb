@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/mendelgusmao/gofuzzyset"
 	"github.com/mendelgusmao/scoredb/lib/fuzzymap/normalizer"
+	fuzzyset "github.com/mendelgusmao/scoredb/lib/fuzzyset"
 	"github.com/mendelgusmao/scoredb/lib/set"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	msgpack "github.com/vmihailenco/msgpack/v5"
@@ -13,7 +13,7 @@ import (
 
 type FuzzyMap[V any] struct {
 	candidates       cmap.ConcurrentMap[*set.Set[V]]
-	fuzzySet         *gofuzzyset.FuzzySet
+	fuzzySet         *fuzzyset.FuzzySet
 	normalizerConfig normalizer.SetConfiguration
 	keyNormalizer    normalizer.KeyNormalizer
 }
@@ -29,7 +29,7 @@ type FuzzyMapConfig struct {
 type FuzzyMapRepresentation[V any] struct {
 	NormalizerConfig normalizer.SetConfiguration
 	Candidates       map[string]*set.Set[V]
-	FuzzySet         *gofuzzyset.FuzzySet
+	FuzzySet         *fuzzyset.FuzzySet
 }
 
 type Match[V any] struct {
@@ -40,7 +40,7 @@ type Match[V any] struct {
 func New[V any](config FuzzyMapConfig) *FuzzyMap[V] {
 	fuzzyMap := &FuzzyMap[V]{
 		candidates: cmap.New[*set.Set[V]](),
-		fuzzySet: gofuzzyset.New(
+		fuzzySet: fuzzyset.New(
 			[]string{},
 			config.UseLevenshtein,
 			config.GramSizeLower,
@@ -164,7 +164,7 @@ func (f *FuzzyMap[V]) UnmarshalMsgpack(input []byte) error {
 	fuzzyMapRepr := FuzzyMapRepresentation[V]{
 		NormalizerConfig: normalizer.SetConfiguration{},
 		Candidates:       make(map[string]*set.Set[V]),
-		FuzzySet:         &gofuzzyset.FuzzySet{},
+		FuzzySet:         &fuzzyset.FuzzySet{},
 	}
 
 	if err := dec.Decode(&fuzzyMapRepr); err != nil {
