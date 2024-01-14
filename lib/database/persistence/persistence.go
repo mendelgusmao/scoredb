@@ -12,28 +12,28 @@ import (
 	msgpack "github.com/vmihailenco/msgpack/v5"
 )
 
-type Persistence struct {
-	database *database.Database
+type Persistence[T any] struct {
+	database *database.Database[T]
 	config   Configuration
 	loading  bool
 }
 
-func NewPersistence(database *database.Database, config Configuration) *Persistence {
-	return &Persistence{
+func NewPersistence[T any](database *database.Database[T], config Configuration) *Persistence[T] {
+	return &Persistence[T]{
 		database: database,
 		config:   config,
 	}
 }
 
-func (p *Persistence) Loading() bool {
+func (p *Persistence[T]) Loading() bool {
 	return p.loading
 }
 
-func (p *Persistence) Load() {
+func (p *Persistence[T]) Load() {
 	go p.load()
 }
 
-func (p *Persistence) load() {
+func (p *Persistence[T]) load() {
 	p.loading = true
 	defer func() { p.loading = false }()
 
@@ -61,7 +61,7 @@ func (p *Persistence) load() {
 	log.Println("[Persistence.Load] Database is loaded")
 }
 
-func (p *Persistence) Save() error {
+func (p *Persistence[T]) Save() error {
 	buffer := bytes.NewBuffer(nil)
 	err := msgpack.NewEncoder(buffer).Encode(p.database)
 
@@ -76,7 +76,7 @@ func (p *Persistence) Save() error {
 	return nil
 }
 
-func (p *Persistence) Work() {
+func (p *Persistence[T]) Work() {
 	interval := p.config.SnapshotInterval
 	ticker := time.NewTicker(interval)
 

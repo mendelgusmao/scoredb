@@ -12,7 +12,7 @@ import (
 func main() {
 	var (
 		err     error
-		persist *persistence.Persistence
+		persist *persistence.Persistence[any]
 	)
 
 	if err = readConfig(); err != nil {

@@ -10,10 +10,10 @@ type FuzzySetConfiguration struct {
 	normalizer.SetConfiguration
 }
 
-type Document struct {
+type Document[T any] struct {
 	Keys      []string `json:"keys"`
 	ExactKeys []string `json:"exactKeys"`
-	Content   any      `json:"content"`
+	Content   T        `json:"content"`
 }
 
 const (
